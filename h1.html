@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Visualizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .array {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .bar {
+      background-color: #007bff;
+      border: 1px solid #007bff;
+      margin: 0 2px;
+      width: 20px;
+      height: 100px;
+      transition: height 0.3s;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Algorithm Visualizer</h1>
+    <div class="array" id="array"></div>
+    <button onclick="visualizeInsertionSort()">Visualize Insertion Sort</button>
+    <button onclick="visualizeBubbleSort()">Visualize Bubble Sort</button>
+    <button onclick="visualizeSelectionSort()">Visualize Selection Sort</button>
+    <button onclick="visualizeCountingSort()">Visualize Counting Sort</button>
+    <button onclick="visualizeMergeSort()">Visualize Merge Sort</button>
+  </div>
+
+  <script>
+    function generateRandomArray(size, min, max) {
+      const array = [];
+      for (let i = 0; i < size; i++) {
+        array.push(Math.floor(Math.random() * (max - min + 1)) + min);
+      }
+      return array;
+    }
+
+    function renderArray(array) {
+      const arrayContainer = document.getElementById('array');
+      arrayContainer.innerHTML = '';
+      array.forEach((value) => {
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.height = `${value}px`;
+        arrayContainer.appendChild(bar);
+      });
+    }
+
+    async function visualizeInsertionSort() {
+      const array = generateRandomArray(20, 10, 100);
+      renderArray(array);
+      await insertionSort(array);
+    }
+
+    async function insertionSort(array) {
+      const n = array.length;
+      for (let i = 1; i < n; i++) {
+        let key = array[i];
+        let j = i - 1;
+        while (j >= 0 && array[j] > key) {
+          array[j + 1] = array[j];
+          j = j - 1;
+          renderArray(array);
+          await sleep(100); // Adjust animation speed (milliseconds)
+        }
+        array[j + 1] = key;
+      }
+    }
+
+    async function visualizeBubbleSort() {
+      const array = generateRandomArray(20, 10, 100);
+      renderArray(array);
+      await bubbleSort(array);
+    }
+
+    async function bubbleSort(array) {
+      const n = array.length;
+      for (let i = 0; i < n - 1; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+          if (array[j] > array[j + 1]) {
+            await swap(array, j, j + 1);
+            renderArray(array);
+            await sleep(100); // Adjust animation speed (milliseconds)
+          }
+        }
+      }
+    }
+
+    async function visualizeSelectionSort() {
+      const array = generateRandomArray(20, 10, 100);
+      renderArray(array);
+      await selectionSort(array);
+    }
+
+    async function selectionSort(array) {
+      const n = array.length;
+      for (let i = 0; i < n - 1; i++) {
+        let minIndex = i;
+        for (let j = i + 1; j < n; j++) {
+          if (array[j] < array[minIndex]) {
+            minIndex = j;
+          }
+        }
+        await swap(array, i, minIndex);
+        renderArray(array);
+        await sleep(100); // Adjust animation speed (milliseconds)
+      }
+    }
+
+    async function visualizeCountingSort() {
+      const array = generateRandomArray(20, 10, 30);
+      renderArray(array);
+      await countingSort(array);
+    }
+
+    async function countingSort(array) {
+      const max = Math.max(...array);
+      const count = new Array(max + 1).fill(0);
+      for (let num of array) {
+        count[num]++;
+      }
+      let sortedIndex = 0;
+      for (let i = 0; i < count.length; i++) {
+        while (count[i] > 0) {
+          array[sortedIndex++] = i;
+          count[i]--;
+          renderArray(array);
+          await sleep(100); // Adjust animation speed (milliseconds)
+        }
+      }
+    }
+
+    async function visualizeMergeSort() {
+      const array = generateRandomArray(20, 10, 100);
+      renderArray(array);
+      await mergeSort(array, 0, array.length - 1);
+    }
+
+    async function mergeSort(array, left, right) {
+      if (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        await mergeSort(array, left, mid);
+        await mergeSort(array, mid + 1, right);
+        await merge(array, left, mid, right);
+        renderArray(array);
+        await sleep(100); // Adjust animation speed (milliseconds)
+      }
+    }
+
+    async function merge(array, left, mid, right) {
+      const n1 = mid - left + 1;
+      const n2 = right - mid;
+      const L = new Array(n1);
+      const R = new Array(n2);
+      for (let i = 0; i < n1; i++) {
+        L[i] = array[left + i];
+      }
+      for (let j = 0; j < n2; j++) {
+        R[j] = array[mid + 1 + j];
+      }
+      let i = 0, j = 0, k = left;
+      while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+          array[k++] = L[i++];
+        } else {
+          array[k++] = R[j++];
+        }
+      }
+      while (i < n1) {
+        array[k++] = L[i++];
+      }
+      while (j < n2) {
+        array[k++] = R[j++];
+      }
+    }
+
+    async function swap(array, i, j) {
+      const temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
+</body>
+</html>
